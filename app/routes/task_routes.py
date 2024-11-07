@@ -12,13 +12,20 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 def create_task():
   request_body = request.get_json()
 
-  if "title" not in request_body or "description" not in request_body:
-        return {"details": "Invalid data"}, 400
-  title = request_body["title"]
-  description = request_body["description"]
-  completed_at = request_body.get("completed_at")
+  try:
+     new_task = Task.from_dict(request_body)
 
-  new_task = Task(title=title, description=description, completed_at=completed_at)
+  except KeyError:
+     response = {"details": "Invalid data"}
+     abort(make_response(response, 400))
+
+  # if "title" not in request_body or "description" not in request_body:
+  #       return {"details": "Invalid data"}, 400
+  # title = request_body["title"]
+  # description = request_body["description"]
+  # completed_at = request_body.get("completed_at")
+
+  # new_task = Task(title=title, description=description, completed_at=completed_at)
 
   db.session.add(new_task)
   db.session.commit()
@@ -35,13 +42,19 @@ def get_all_tasks():
     query = query.where(Task.description.ilike(f"%{description_param}%")).order_by(Task.id)
 
   title_param = request.args.get("title")
+  sort = request.args.get("sort", "asc")  # Default to ascending order
+
+  query = db.select(Task)
+
   if title_param:
-    query = query.where(Task.title.ilike(f"%{title_param}%")).order_by(Task.id)
+      query = query.where(Task.title.ilike(f"%{title_param}%"))
 
+  if sort == "desc":
+      query = query.order_by(Task.title.desc())
+  else:
+      query = query.order_by(Task.title.asc())
 
-  query = query.order_by(Task.id)
   tasks = db.session.scalars(query)
-
   tasks_response = [task.to_dict() for task in tasks]
 
   return tasks_response, 200
@@ -68,6 +81,23 @@ def update_task(task_id):
   response = {"task": task.to_dict()}
   return response, 200
 
+@tasks_bp.patch("/<task_id>/mark_complete")
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = datetime.now()
+    db.session.commit()
+
+    return {"task": task.to_dict()}, 200
+
+@tasks_bp.patch("/<task_id>/mark_incomplete")
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = None
+
+    db.session.commit()
+
+    return {"task": task.to_dict()}, 200
+
 
 @tasks_bp.delete("/<task_id>")
 def delete_task(task_id):
@@ -87,7 +117,7 @@ def validate_task(task_id):
         response = {"details": f"Task {task_id} invalid"}
         abort(make_response(response, 404))
 
-  task = Task.query.get(task_id)
+  task = db.session.get(Task,task_id)
 
   if not task:
         response = {"message": f"task {task_id} not found"}
