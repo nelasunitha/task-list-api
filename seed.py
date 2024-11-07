@@ -6,7 +6,7 @@ from datetime import datetime
 my_app = create_app()
 with my_app.app_context():
    db.session.add_all([
-    Task(title="Finish Project Report", description="Complete the final report for the project", completed_at=datetime(2024, 10, 1, 14, 30)),
+    Task(title="Go on my daily walk 🏞", description="Notice something new every day", completed_at=None),
     Task(title="Team Meeting", description="Attend the weekly team sync-up meeting", completed_at=datetime(2024, 10, 2, 9, 0)),
     Task(title="Code Review", description="Review code for recent pull requests", completed_at=datetime(2024, 10, 3, 11, 15)),
     Task(title="Client Call", description="Discuss requirements with the client", completed_at=datetime(2024, 10, 4, 15, 0)),

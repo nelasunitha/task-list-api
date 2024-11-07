@@ -9,9 +9,11 @@ class Task(db.Model):
     description: Mapped[str]
     completed_at: Mapped[Optional[datetime]]
 
+
     def to_dict(self):
+
         return dict(
         id=self.id,
         title=self.title,
         description=self.description,
-        is_complete=False)
+        is_complete=bool(self.completed_at))
