@@ -1,5 +1,6 @@
 from flask import Blueprint, abort, make_response, request, Response
 from app.models.goal import Goal
+from app.models.task import Task
 from ..db import db
 from datetime import datetime
 
@@ -95,17 +96,38 @@ def delete_goal(goal_id):
     }
   return response, 200
 
-def validate_goal(goal_id):
-  try:
-      goal_id = int(goal_id)
-  except ValueError:
+@goals_bp.get("<goal_id>/tasks")
+def get_tasks_by_goal(goal_id):
+    goal = validate_goal(Goal, goal_id)
+
+    goal_dict = goal.to_dict()
+    goal_dict["tasks"] = [task.to_dict() for task in goal.tasks]
+
+    return goal_dict
+
+@goals_bp.get("<goal_id>/tasks/<task_id>")
+def get_one_task_by_goal(goal_id, task_id):
+
+    goal = validate_goal(Goal, goal_id)
+    task = validate_goal(Task, task_id)
+
+    if task in goal.tasks:
+        goal_dict = goal.to_dict()
+        goal_dict["task"] = task.to_dict()
+        return goal_dict
+    return {"details": f"Task {task.id} not found for Goal {goal.id}"}, 404
+
+def validate_goal(cls, goal_id):
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
         response = {"details": f"Goal {goal_id} invalid"}
         abort(make_response(response, 404))
 
-  goal = db.session.get(Goal,goal_id)
+    goal = db.session.get(cls, goal_id)
 
-  if not goal:
-        response = {"message": f"goal {goal_id} not found"}
+    if not goal:
+        response = {"message": f"Goal {goal_id} not found"}
         abort(make_response(response, 404))
 
-  return goal
+    return goal
