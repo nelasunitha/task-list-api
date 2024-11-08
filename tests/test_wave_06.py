@@ -56,7 +56,7 @@ def test_get_tasks_for_specific_goal_no_goal(client):
     # **Complete test with assertion about response body***************
     # *****************************************************************
     id = 1
-    assert response_body == {"message": f"Goal {id} not found"}
+    assert response_body == {"message": f"goal {id} not found"}
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):

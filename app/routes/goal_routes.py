@@ -96,14 +96,28 @@ def delete_goal(goal_id):
     }
   return response, 200
 
-@goals_bp.get("<goal_id>/tasks")
-def get_tasks_by_goal(goal_id):
-    goal = validate_goal(Goal, goal_id)
+@goals_bp.post("/<goal_id>/tasks")
+@goals_bp.post("/<goal_id>/tasks")
+def assign_tasks_to_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+    task_ids = request_body.get("task_ids", [])
 
+    tasks = Task.query.filter(Task.id.in_(task_ids)).all()
+
+    goal.tasks.extend(tasks)
+    db.session.commit()
+
+    return {"id": goal.id, "task_ids": task_ids}, 200  
+
+
+@goals_bp.get("/<goal_id>/tasks")
+def get_tasks_by_goal(goal_id):
+    goal = validate_goal(goal_id)
     goal_dict = goal.to_dict()
     goal_dict["tasks"] = [task.to_dict() for task in goal.tasks]
-
     return goal_dict
+
 
 @goals_bp.get("<goal_id>/tasks/<task_id>")
 def get_one_task_by_goal(goal_id, task_id):
@@ -117,17 +131,14 @@ def get_one_task_by_goal(goal_id, task_id):
         return goal_dict
     return {"details": f"Task {task.id} not found for Goal {goal.id}"}, 404
 
-def validate_goal(cls, goal_id):
+def validate_goal(goal_id):
     try:
         goal_id = int(goal_id)
     except ValueError:
-        response = {"details": f"Goal {goal_id} invalid"}
-        abort(make_response(response, 404))
+        abort(400, description="Invalid goal_id")
 
-    goal = db.session.get(cls, goal_id)
-
-    if not goal:
-        response = {"message": f"Goal {goal_id} not found"}
-        abort(make_response(response, 404))
+    goal = Goal.query.get(goal_id)
+    if goal is None:
+        abort(make_response({"message": f"goal {goal_id} not found"}, 404))
 
     return goal
