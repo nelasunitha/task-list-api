@@ -19,13 +19,6 @@ def create_task():
      response = {"details": "Invalid data"}
      abort(make_response(response, 400))
 
-  # if "title" not in request_body or "description" not in request_body:
-  #       return {"details": "Invalid data"}, 400
-  # title = request_body["title"]
-  # description = request_body["description"]
-  # completed_at = request_body.get("completed_at")
-
-  # new_task = Task(title=title, description=description, completed_at=completed_at)
 
   db.session.add(new_task)
   db.session.commit()
