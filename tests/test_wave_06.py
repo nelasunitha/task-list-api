@@ -5,40 +5,32 @@ import pytest
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_post_task_ids_to_goal(client, one_goal, three_tasks):
     # Act
-    response = client.post("/goals/1/tasks", json={
-        "task_ids": [1, 2, 3]
-    })
+    response = client.post("/goals/1/tasks", json={"task_ids": [1, 2, 3]})
     response_body = response.get_json()
 
     # Assert
     assert response.status_code == 200
     assert "id" in response_body
     assert "task_ids" in response_body
-    assert response_body == {
-        "id": 1,
-        "task_ids": [1, 2, 3]
-    }
+    assert response_body == {"id": 1, "task_ids": [1, 2, 3]}
 
     # Check that Goal was updated in the db
     assert len(Goal.query.get(1).tasks) == 3
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
-def test_post_task_ids_to_goal_already_with_goals(client, one_task_belongs_to_one_goal, three_tasks):
+def test_post_task_ids_to_goal_already_with_goals(
+    client, one_task_belongs_to_one_goal, three_tasks
+):
     # Act
-    response = client.post("/goals/1/tasks", json={
-        "task_ids": [1, 4]
-    })
+    response = client.post("/goals/1/tasks", json={"task_ids": [1, 4]})
     response_body = response.get_json()
 
     # Assert
     assert response.status_code == 200
     assert "id" in response_body
     assert "task_ids" in response_body
-    assert response_body == {
-        "id": 1,
-        "task_ids": [1, 4]
-    }
+    assert response_body == {"id": 1, "task_ids": [1, 4]}
     assert len(Goal.query.get(1).tasks) == 2
 
 
@@ -58,6 +50,7 @@ def test_get_tasks_for_specific_goal_no_goal(client):
     id = 1
     assert response_body == {"message": f"goal {id} not found"}
 
+
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
     # Act
@@ -71,7 +64,7 @@ def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
     assert response_body == {
         "id": 1,
         "title": "Build a habit of going outside daily",
-        "tasks": []
+        "tasks": [],
     }
 
 
@@ -94,9 +87,9 @@ def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
                 "goal_id": 1,
                 "title": "Go on my daily walk 🏞",
                 "description": "Notice something new every day",
-                "is_complete": False
+                "is_complete": False,
             }
-        ]
+        ],
     }
 
 
@@ -114,6 +107,6 @@ def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
             "goal_id": 1,
             "title": "Go on my daily walk 🏞",
             "description": "Notice something new every day",
-            "is_complete": False
+            "is_complete": False,
         }
     }

@@ -1,24 +1,24 @@
-from sqlalchemy.orm import Mapped, mapped_column,relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 from ..db import db
 from datetime import datetime
 from typing import Optional
+
 
 class Task(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str]
     description: Mapped[str]
     completed_at: Mapped[Optional[datetime]]
-    goal_id: Mapped[Optional[int]] = db.Column(db.Integer, db.ForeignKey('goal.id'))
-    goal: Mapped[Optional['Goal']] = db.relationship('Goal', back_populates='tasks')
-
+    goal_id: Mapped[Optional[int]] = db.Column(db.Integer, db.ForeignKey("goal.id"))
+    goal: Mapped[Optional["Goal"]] = db.relationship("Goal", back_populates="tasks")
 
     def to_dict(self):
         task_dict = {
-        "id": self.id,
-        "title": self.title,
-        "description": self.description,
-        "is_complete": self.completed_at is not None
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": self.completed_at is not None,
         }
         if self.goal_id is not None:
             task_dict["goal_id"] = self.goal_id
@@ -27,8 +27,8 @@ class Task(db.Model):
     @classmethod
     def from_dict(cls, task_data):
         return cls(
-        goal_id=task_data.get("goal_id"),
-        title=task_data["title"],
-        description=task_data["description"],
-        completed_at=task_data.get("completed_at", None)
-    )
+            goal_id=task_data.get("goal_id"),
+            title=task_data["title"],
+            description=task_data["description"],
+            completed_at=task_data.get("completed_at", None),
+        )
