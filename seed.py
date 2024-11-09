@@ -12,10 +12,11 @@ with my_app.app_context():
     goal2 = Goal(title="Team Collaboration")
     goal3 = Goal(title="Skill Development")
     goal4 = Goal(title="Project Planning")
+    
 
     db.session.add_all([goal1, goal2, goal3, goal4])
     db.session.commit()
-    
+
     tasks = [
         Task(title="Go on my daily walk 🏞", description="Notice something new every day", completed_at=None, goal_id=goal1.id),
         Task(title="Yoga Practice", description="30 minutes of morning yoga", completed_at=None, goal_id=goal1.id),
