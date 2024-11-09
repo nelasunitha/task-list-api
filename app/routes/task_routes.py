@@ -3,6 +3,11 @@ from app.models.task import Task
 from ..db import db
 from datetime import datetime
 from app.models.task import Task
+import os
+import requests
+
+SLACK_API_URL = "https://slack.com/api/chat.postMessage"
+SLACK_CHANNEL = "C07TDEQ17RQ"
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -80,6 +85,8 @@ def mark_task_complete(task_id):
     task.completed_at = datetime.now()
     db.session.commit()
 
+    send_slack_message(task.title)
+
     return {"task": task.to_dict()}, 200
 
 @tasks_bp.patch("/<task_id>/mark_incomplete")
@@ -90,6 +97,25 @@ def mark_task_incomplete(task_id):
     db.session.commit()
 
     return {"task": task.to_dict()}, 200
+def send_slack_message(task_title):
+    token = os.environ.get("SLACK_BOT_TOKEN")
+    if not token:
+        raise ValueError("Slack Bot Token is not set in environment variables.")
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "channel": SLACK_CHANNEL,
+        "text": f"Beautiful task {task_title}"
+    }
+
+    response = requests.post(SLACK_API_URL, headers=headers, json=payload)
+    if response.status_code != 200:
+        print("Failed to send Slack message:", response.json())
+    else:
+        print("Slack message sent successfully.")
 
 
 @tasks_bp.delete("/<task_id>")
