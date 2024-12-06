@@ -100,7 +100,7 @@ def assign_tasks_to_goal(goal_id):
     request_body = request.get_json()
     task_ids = request_body.get("task_ids", [])
 
-    tasks = Task.query.filter(Task.id.in_(task_ids)).all()
+    tasks = [validate_model(Task, task_id) for task_id in task_ids]
 
     goal.tasks.extend(tasks)
     db.session.commit()
