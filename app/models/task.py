@@ -7,7 +7,7 @@ from typing import Optional
 
 class Task(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    title: Mapped[str]
+    title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str]
     completed_at: Mapped[Optional[datetime]]
     goal_id: Mapped[Optional[int]] = db.Column(db.Integer, db.ForeignKey("goal.id"))
