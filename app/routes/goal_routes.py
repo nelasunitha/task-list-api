@@ -14,8 +14,8 @@ def create_goal():
     try:
         new_goal = Goal.from_dict(request_body)
 
-    except KeyError:
-        response = {"details": "Invalid data"}
+    except KeyError as error:
+        response = {"details": f"Invalid data - missing {error.args[0]}"}
         abort(make_response(response, 400))
 
     db.session.add(new_goal)
